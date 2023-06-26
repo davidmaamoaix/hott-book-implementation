@@ -111,5 +111,23 @@ data 𝟘 : Set where
 𝟘-ind : Π (𝟘 → Set) (λ C → Π 𝟘 C)
 𝟘-ind f ()
 
+-- The boolean type.
+-- ngl i hate using single character as type name
+data 𝟚 : Set where
+    0₂ : 𝟚
+    1₂ : 𝟚
 
+-- Recursor for boolean type.
+𝟚-rec : ∀ {a} → Π (Set a) (λ C → C → C → 𝟚 → C)
+𝟚-rec C a b 0₂ = a
+𝟚-rec C a b 1₂ = b
+
+-- Induction for boolean type.
+𝟚-ind : ∀ {a} → Π (𝟚 → Set a) (λ C → C 0₂ → C 1₂ → Π 𝟚 C)
+𝟚-ind C f₁ f₂ 0₂ = f₁
+𝟚-ind C f₁ f₂ 1₂ = f₂
+
+-- Alternative definition of coproduct with recursor for boolean type.
+_+′_ : ∀ {a} → (A B : Set a) → Set a
+_+′_ {a} A B = Σ 𝟚 (𝟚-rec (Set a) A B)
   
