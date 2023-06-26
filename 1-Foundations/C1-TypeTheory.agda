@@ -84,4 +84,32 @@ upun ⋆ = refl
 -- Type-theoretic axiom of choice.
 ac : {A B : Set} {R : A → B → Set} → (Π A (λ x → Σ B (R x))) → Σ (A → B) (λ f → Π A (λ x → R x (f x)))
 ac {A} {B} {R} f = ((λ x → pr₁ (f x)) , (λ x → pr₂ (f x)))
- 
+
+-- The coproduct type.
+data _+_ (A B : Set) : Set where
+    inl : A → A + B
+    inr : B → A + B
+
+-- Recursor for coproduct type.
++-rec : {A B : Set} → Π Set (λ C → (A → C) → (B → C) → (A + B → C))
++-rec C f₁ f₂ (inl a) = f₁ a
++-rec C f₁ f₂ (inr b) = f₂ b
+
+-- Induction for coproduct type.
++-ind : {A B : Set} → Π (A + B → Set) (λ C → (Π A (λ a → C (inl a))) → (Π B (λ b → C (inr b))) → Π (A + B) C)
++-ind C f₁ f₂ (inl a) = f₁ a
++-ind C f₁ f₂ (inr b) = f₂ b
+
+-- The empty type.
+data 𝟘 : Set where
+
+-- Recursor for empty type.
+𝟘-rec : Π Set (λ C → 𝟘 → C)
+𝟘-rec C ()
+
+-- Induction for empty type.
+𝟘-ind : Π (𝟘 → Set) (λ C → Π 𝟘 C)
+𝟘-ind f ()
+
+
+  
