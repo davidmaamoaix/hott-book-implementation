@@ -128,6 +128,73 @@ data 𝟚 : Set where
 𝟚-ind C f₁ f₂ 1₂ = f₂
 
 -- Alternative definition of coproduct with recursor for boolean type.
-_+′_ : ∀ {a} → (A B : Set a) → Set a
-_+′_ {a} A B = Σ 𝟚 (𝟚-rec (Set a) A B)
-  
+
+_+′_ : ∀ {l} → (A B : Set l) → Set l
+_+′_ {l} A B = Σ 𝟚 (𝟚-rec (Set l) A B)
+
++′-inl : ∀ {l} {A B : Set l} → A → A +′ B
++′-inl a = (0₂ , a)
+
++′-inr : ∀ {l} {A B : Set l} → B → A +′ B
++′-inr b = (1₂ , b)
+
+-- Alternative definition of product with recursor for boolean type.
+
+_×′_ : ∀ {l} → (A B : Set l) → Set l
+_×′_ {l} A B = Π 𝟚 (𝟚-rec (Set l) A B)
+
+×′-pr₁ : ∀ {l} {A B : Set l} → A ×′ B → A
+×′-pr₁ f = f 0₂
+
+×′-pr₂ : ∀ {l} {A B : Set l} → A ×′ B → B
+×′-pr₂ f = f 1₂
+
+-- Natural numbers.
+data ℕ : Set where
+    zero : ℕ
+    succ : ℕ → ℕ
+
+-- Doubles a number.
+double : ℕ → ℕ
+double zero = zero
+double (succ n) = succ (succ (double n))
+
+-- Adds two numbers.
+_++_ : ℕ → ℕ → ℕ
+_++_ zero n = n
+_++_ (succ m) n = succ (m ++ n)
+
+-- Recursor for natural numbers.
+ℕ-rec : Π Set (λ C → C → (ℕ → C → C) → ℕ → C)
+ℕ-rec C c₀ cₛ zero = c₀
+ℕ-rec C c₀ cₛ (succ n) = cₛ n (ℕ-rec C c₀ cₛ n)
+
+-- Induction for natural numbers.
+ℕ-ind : Π (ℕ → Set) (λ C → C zero → (Π ℕ (λ n → C n → C (succ n))) → Π ℕ C)
+ℕ-ind C c₀ cₛ zero = c₀
+ℕ-ind C c₀ cₛ (succ n) = cₛ n (ℕ-ind C c₀ cₛ n)
+
+-- Alternative definitions for arithmetics with recursors.
+
+double′ : ℕ → ℕ
+double′ = ℕ-rec ℕ zero (λ _ f → succ (succ f))
+
+++′ : ℕ → ℕ → ℕ
+++′ = ℕ-rec (ℕ → ℕ) (λ n → n) (λ _ g m → succ (g m))
+
+-- Association rule for natural number addition.
+
+ap-succ : Π ℕ (λ m → Π ℕ (λ n → m ≡ n → succ m ≡ succ n))
+ap-succ m n refl = refl
+
+goal : ℕ → Set
+goal i = Π ℕ (λ j → Π ℕ (λ k → i ++ (j ++ k) ≡ (i ++ j) ++ k))
+
+assoc₀ : Π ℕ (λ j → Π ℕ (λ k → zero ++ (j ++ k) ≡ (zero ++ j) ++ k))
+assoc₀ j k = refl
+
+assocₛ : Π ℕ (λ i → (Π ℕ (λ j → Π ℕ (λ k → i ++ (j ++ k) ≡ (i ++ j) ++ k))) → Π ℕ (λ j → Π ℕ (λ k → succ i ++ (j ++ k) ≡ (succ i ++ j) ++ k)))
+assocₛ i h j k = ap-succ (i ++ (j ++ k)) ((i ++ j) ++ k) (h j k)
+
+assoc : Π ℕ (λ i → Π ℕ (λ j → Π ℕ (λ k → i ++ (j ++ k) ≡ (i ++ j) ++ k)))
+assoc = ℕ-ind goal assoc₀ assocₛ
