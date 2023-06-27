@@ -198,3 +198,11 @@ assocₛ i h j k = ap-succ (i ++ (j ++ k)) ((i ++ j) ++ k) (h j k)
 
 assoc : Π ℕ (λ i → Π ℕ (λ j → Π ℕ (λ k → i ++ (j ++ k) ≡ (i ++ j) ++ k)))
 assoc = ℕ-ind goal assoc₀ assocₛ
+
+-- Path induction.
+p-ind : {A : Set} → Π (Π A (λ x → Π A (λ y → (x ≡ y) → Set))) (λ C → (Π A (λ x → C x x refl)) → Π A (λ x → Π A (λ y → Π (x ≡ y) (λ p → C x y p))))
+p-ind C c a b refl = c a
+
+-- Based path induction.
+p-ind′ : {A : Set} → Π A (λ a → Π (Π A (λ x → a ≡ x → Set)) (λ C → C a refl → Π A (λ x → Π (a ≡ x) (λ p → C x p))))
+p-ind′ a C c b refl = c
