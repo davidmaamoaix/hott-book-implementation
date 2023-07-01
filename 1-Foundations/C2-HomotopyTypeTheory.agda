@@ -69,4 +69,30 @@ sym∙ = J (λ y₁ p → sym p ∙ p ≡ refl)
     ≡⟨ refl∙refl ⟩
         refl
     )
- 
+
+-- (iii)
+
+symsym : (p : x ≡ y) → sym (sym p) ≡ p
+symsym = J (λ y₁ p → sym (sym p) ≡ p)
+    (
+        sym (sym refl)
+    ≡⟨ cong sym symRefl ⟩
+        sym refl
+    ≡⟨ symRefl ⟩
+        refl
+    ∎
+    )
+
+-- (iv)
+
+assoc : (p : w ≡ x) → (q : x ≡ y) → (r : y ≡ z) → p ∙ (q ∙ r) ≡ (p ∙ q) ∙ r
+assoc {y = y} {z = z} = J
+    (λ x₁ p → (q : x₁ ≡ y) → (r : y ≡ z) → p ∙ (q ∙ r) ≡ (p ∙ q) ∙ r)
+    (λ q r →
+        refl ∙ q ∙ r
+    ≡⟨ cong (λ f → f (q ∙ r)) ∙-refl ⟩
+        q ∙ r
+    ≡⟨ sym (cong (λ o → o ∙ r) (refl∙ q)) ⟩
+        (refl ∙ q) ∙ r
+    ∎
+    )
