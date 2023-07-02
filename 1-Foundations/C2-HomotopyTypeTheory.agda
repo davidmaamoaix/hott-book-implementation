@@ -2,6 +2,8 @@
 
 module C2-HomotopyTypeTheory where
 
+open import Data.Product
+open import Data.Nat
 open import Agda.Primitive using (Level; lsuc)
 open import Cubical.Foundations.Prelude using
     (_≡_; refl; J; JRefl; cong; _≡⟨⟩_; step-≡; _∎)
@@ -37,7 +39,7 @@ infixr 30 _∙_
 refl∙refl : refl {x = x} ∙ refl ≡ refl
 refl∙refl = cong (λ f → f refl) ∙-refl
 
--- Lemma 2.1.4
+-- Lemma 2.1.4: Higher Groupoid Structure.
 
 -- (i)
 
@@ -96,3 +98,28 @@ assoc {y = y} {z = z} = J
         (refl ∙ q) ∙ r
     ∎
     )
+
+
+-- Theorem 2.1.6.
+
+_∙ᵣ_ : {p q : x ≡ y} (α : p ≡ q) → (r : y ≡ z) → p ∙ r ≡ q ∙ r
+_∙ᵣ_ {p = p} {q = q} α = J (λ z r → p ∙ r ≡ q ∙ r) (cong (λ p → p ∙ refl) α)
+
+_∙ₗ_ : (r : x ≡ y) → {p q : y ≡ z} (β : p ≡ q) → r ∙ p ≡ r ∙ q
+_∙ₗ_ r {p} {q} = J (λ q β → r ∙ p ≡ r ∙ q) refl
+
+_⋆_ : {p q : x ≡ y} (α : p ≡ q) → {r s : y ≡ z} (β : r ≡ s) → p ∙ r ≡ q ∙ s
+_⋆_ {q = q} α {r = r} β = (α ∙ᵣ r) ∙ (q ∙ₗ β)
+
+-- TODO: Eckmann-Hilton argument.
+
+-- Loop space of a pointed type.
+Ω : Σ Set id → Σ Set id
+Ω (A , a) = ((a ≡ a) , refl)
+
+-- Iterated loop space.
+Ωⁿ : ℕ → Σ Set id → Σ Set id
+Ωⁿ zero tup = tup
+Ωⁿ (suc n) tup = Ωⁿ n (Ω tup)
+
+
