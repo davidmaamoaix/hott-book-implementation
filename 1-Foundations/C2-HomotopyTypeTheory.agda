@@ -3,6 +3,7 @@
 module C2-HomotopyTypeTheory where
 
 open import Data.Product
+open import Function using (id; _∘_)
 open import Data.Nat hiding (_⊔_)
 open import Agda.Primitive using (Level; lsuc; _⊔_)
 open import Cubical.Foundations.Prelude using
@@ -11,12 +12,8 @@ open import Cubical.Foundations.Prelude using
 private
     variable
         u : Level
-        A B : Set u
+        A B C : Set u
         w x y z : A
-
--- Identity function.
-id : x → x
-id x = x
 
 -- Lemma 2.1.1: Symmetry of path.
 
@@ -124,11 +121,46 @@ _⋆_ {q = q} α {r = r} β = (α ∙ᵣ r) ∙ (q ∙ₗ β)
 
 -- Lemma 2.2.1.
 
-Ap : ∀ {u v} → {A : Set u} → {B : Set v} → (A → B) → Set (u ⊔ v)
-Ap f = ∀ {x y} → x ≡ y → f x ≡ f y
+ap : (f : A → B) → ∀ {x y} → x ≡ y → f x ≡ f y
+ap f = cong f
 
---lem-ap : (f : A → B) → Ap f
---lem-ap f {x} = J (λ y p → f x ≡ f y) refl
+ap-refl : (f : A → B) → ap f {x} refl ≡ refl
+ap-refl f = refl
 
---ap-refl : (f : A → B) →  → ap refl ≡ refl
---ap-refl f ap = {!   !}
+-- Lemma 2.2.1.
+
+-- (i)
+
+ap∙ : (f : A → B) → (p : x ≡ y) → (q : y ≡ z) → ap f (p ∙ q ) ≡ ap f p ∙ ap f q
+ap∙ f p = J (λ z q → ap f (p ∙ q) ≡ ap f p ∙ ap f q)
+    (
+        ap f (p ∙ refl)
+    ≡⟨ cong (ap f) (∙refl p) ⟩
+        ap f p
+    ≡⟨ sym (∙refl (ap f p)) ⟩
+        ap f p ∙ ap f refl
+    ∎
+    )
+
+-- (ii)
+
+ap-sym : (f : A → B) → (p : x ≡ y) → ap f (sym p) ≡ sym (ap f p)
+ap-sym f = J (λ y p → ap f (sym p) ≡ sym (ap f p))
+    (
+        ap f (sym refl)
+    ≡⟨ cong (ap f) symRefl ⟩
+        refl
+    ≡⟨ sym symRefl ⟩
+        sym (ap f refl)
+    ∎
+    )
+
+-- (iii)
+
+ap-∘ : (f : A → B) → (g : B → C) → (p : x ≡ y) → ap g (ap f p) ≡ ap (g ∘ f) p
+ap-∘ f g = J (λ y p → ap g (ap f p) ≡ ap (g ∘ f) p) refl
+
+-- (iv)
+
+ap-id : (p : x ≡ y) → ap id p ≡ p
+ap-id = J (λ y p → ap id p ≡ p) refl
