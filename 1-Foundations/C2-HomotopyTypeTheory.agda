@@ -3,8 +3,8 @@
 module C2-HomotopyTypeTheory where
 
 open import Data.Product
-open import Data.Nat
-open import Agda.Primitive using (Level; lsuc)
+open import Data.Nat hiding (_⊔_)
+open import Agda.Primitive using (Level; lsuc; _⊔_)
 open import Cubical.Foundations.Prelude using
     (_≡_; refl; J; JRefl; cong; _≡⟨⟩_; step-≡; _∎)
 
@@ -122,4 +122,13 @@ _⋆_ {q = q} α {r = r} β = (α ∙ᵣ r) ∙ (q ∙ₗ β)
 Ωⁿ zero tup = tup
 Ωⁿ (suc n) tup = Ωⁿ n (Ω tup)
 
+-- Lemma 2.2.1.
 
+Ap : ∀ {u v} → {A : Set u} → {B : Set v} → (A → B) → Set (u ⊔ v)
+Ap f = ∀ {x y} → x ≡ y → f x ≡ f y
+
+--lem-ap : (f : A → B) → Ap f
+--lem-ap f {x} = J (λ y p → f x ≡ f y) refl
+
+--ap-refl : (f : A → B) →  → ap refl ≡ refl
+--ap-refl f ap = {!   !}
