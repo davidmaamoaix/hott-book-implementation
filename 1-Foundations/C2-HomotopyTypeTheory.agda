@@ -169,19 +169,19 @@ ap-id = J (λ y p → ap id p ≡ p) refl
 p* : {P : A → Set} → ∀ {x} → x ≡ y → (P x → P y)
 p* {P = P} {x = x} = J (λ y p → P x → P y) id
 
--- Lemma 2.3.2: Path Lifting. (TODO)
+-- Lemma 2.3.2: Path Lifting.
 
---p*-refl : {P : A → Set} → p* {P = P} {x} refl ≡ id
---p*-refl {P = P} = {!   !}
---
---lift : (P : A → Set) → (v : P x) → (p : x ≡ y) → _≡_ {A = Σ A P} (x , v) (y , p* {P = P} p v)
---lift {x = x} P v = J (λ y p → (x , v) ≡ (y , p* p v))
---    (
---        (x , v)
---    ≡⟨ {!   !} ⟩
---        (x , p* {P = P} refl v)
---    ∎
---    )
+p*-refl : {P : A → Set} → p* {P = P} {x} refl ≡ id
+p*-refl {x = x} {P = P} = JRefl (λ y p -> P x -> P y) id
+
+lift : (P : A → Set) → (v : P x) → (p : x ≡ y) → _≡_ {A = Σ A P} (x , v) (y , p* {P = P} p v)
+lift {x = x} P v = J (λ y p → (x , v) ≡ (y , p* p v))
+    (
+        (x , v)
+    ≡⟨ {!   !} ⟩
+        (x , p* {P = P} refl v)
+    ∎
+    )
 
 
- 
+  
