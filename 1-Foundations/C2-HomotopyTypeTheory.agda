@@ -164,3 +164,24 @@ ap-∘ f g = J (λ y p → ap g (ap f p) ≡ ap (g ∘ f) p) refl
 
 ap-id : (p : x ≡ y) → ap id p ≡ p
 ap-id = J (λ y p → ap id p ≡ p) refl
+
+-- Lemma 2.3.1.
+p* : {P : A → Set} → ∀ {x} → x ≡ y → (P x → P y)
+p* {P = P} {x = x} = J (λ y p → P x → P y) id
+
+-- Lemma 2.3.2: Path Lifting. (TODO)
+
+--p*-refl : {P : A → Set} → p* {P = P} {x} refl ≡ id
+--p*-refl {P = P} = {!   !}
+--
+--lift : (P : A → Set) → (v : P x) → (p : x ≡ y) → _≡_ {A = Σ A P} (x , v) (y , p* {P = P} p v)
+--lift {x = x} P v = J (λ y p → (x , v) ≡ (y , p* p v))
+--    (
+--        (x , v)
+--    ≡⟨ {!   !} ⟩
+--        (x , p* {P = P} refl v)
+--    ∎
+--    )
+
+
+ 
