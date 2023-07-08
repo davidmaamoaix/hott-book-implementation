@@ -77,3 +77,21 @@ succ x ≤ succ y = x ≤ y
 x ≥ 0 = 𝟙
 0 ≥ succ y = 𝟘
 succ x ≥ succ y = x ≥ y
+
+infix 10 _≤_
+infix 10 _≥_
+
+data _⨃_ {ℓ₁ ℓ₂} (X : Set ℓ₁) (Y : Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
+    inl : X → X ⨃ Y
+    inr : Y → X ⨃ Y
+
++-induction : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} (A : X ⨃ Y → Set ℓ₃)
+            → ((x : X) → A (inl x))
+            → ((y : Y) → A (inr y))
+            → ((z : X ⨃ Y) → A z)
++-induction A f g (inl x) = f x
++-induction A f g (inr y) = g y
+
++-recursion : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} {A : Set ℓ₃}
+            → (X → A) → (Y → A) → (X ⨃ Y → A)
++-recursion {A = A} = +-induction (λ _ → A)
