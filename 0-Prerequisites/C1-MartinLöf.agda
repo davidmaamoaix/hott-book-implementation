@@ -13,7 +13,7 @@ open import Agda.Primitive
 variable
     ℓ : Level
 
-data 𝟙 : Set where
+data 𝟙 : Set₀ where
     ⋆ : 𝟙
 
 𝟙-induction : ∀ {ℓ} (A : 𝟙 → Set ℓ) → A ⋆ → (x : 𝟙) → A x
@@ -28,7 +28,7 @@ data 𝟙 : Set where
 !𝟙' : ∀ {ℓ} (X : Set ℓ) → X → 𝟙
 !𝟙' X x = ⋆
 
-data 𝟘 : Set where
+data 𝟘 : Set₀ where
 
 𝟘-induction : ∀ {ℓ} (A : 𝟘 → Set ℓ) → (x : 𝟘) → A x
 𝟘-induction A ()
@@ -44,3 +44,36 @@ is-empty A = A → 𝟘
 
 ¬ : ∀ {ℓ} → Set ℓ → Set ℓ
 ¬ = is-empty
+
+data ℕ : Set₀ where
+    zero : ℕ
+    succ : ℕ → ℕ
+
+{-# BUILTIN NATURAL ℕ #-}
+
+ℕ-induction : ∀ {ℓ} (A : ℕ → Set ℓ) → A 0 → ((n : ℕ) → A n → A (succ n)) → ((n : ℕ) → A n)
+ℕ-induction A a f zero = a
+ℕ-induction A a f (succ n) = f n (ℕ-induction A a f n)
+
+ℕ-recursion : ∀ {ℓ} (A : Set ℓ) → A → (ℕ → A → A) → (ℕ → A)
+ℕ-recursion A = ℕ-induction (λ _ → A)
+
+ℕ-iteration : ∀ {ℓ} (A : Set ℓ) → A → (A → A) → ℕ → A
+ℕ-iteration A a₁ f = ℕ-recursion A a₁ (λ _ a₂ → f a₂)
+
+_+_ _×_ : ℕ → ℕ → ℕ
+_+_ x = ℕ-iteration ℕ x succ
+_×_ x = ℕ-iteration ℕ 0 (x +_)
+
+infixl 20 _+_
+infixl 21 _×_
+
+_≤_ _≥_ : ℕ → ℕ → Set₀
+
+0 ≤ y = 𝟙
+succ x ≤ 0 = 𝟘
+succ x ≤ succ y = x ≤ y
+
+x ≥ 0 = 𝟙
+0 ≥ succ y = 𝟘
+succ x ≥ succ y = x ≥ y
