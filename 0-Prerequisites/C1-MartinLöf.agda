@@ -61,12 +61,12 @@ data ℕ : Set₀ where
 ℕ-iteration : ∀ {ℓ} (A : Set ℓ) → A → (A → A) → ℕ → A
 ℕ-iteration A a₁ f = ℕ-recursion A a₁ (λ _ a₂ → f a₂)
 
-_+_ _×_ : ℕ → ℕ → ℕ
+_+_ _*_ : ℕ → ℕ → ℕ
 _+_ x = ℕ-iteration ℕ x succ
-_×_ x = ℕ-iteration ℕ 0 (x +_)
+_*_ x = ℕ-iteration ℕ 0 (x +_)
 
 infixl 20 _+_
-infixl 21 _×_
+infixl 21 _*_
 
 _≤_ _≥_ : ℕ → ℕ → Set₀
 
@@ -85,13 +85,51 @@ data _⨃_ {ℓ₁ ℓ₂} (X : Set ℓ₁) (Y : Set ℓ₂) : Set (ℓ₁ ⊔ �
     inl : X → X ⨃ Y
     inr : Y → X ⨃ Y
 
-+-induction : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} (A : X ⨃ Y → Set ℓ₃)
+⨃-induction : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} (A : X ⨃ Y → Set ℓ₃)
             → ((x : X) → A (inl x))
             → ((y : Y) → A (inr y))
             → ((z : X ⨃ Y) → A z)
-+-induction A f g (inl x) = f x
-+-induction A f g (inr y) = g y
+⨃-induction A f g (inl x) = f x
+⨃-induction A f g (inr y) = g y
 
-+-recursion : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} {A : Set ℓ₃}
+⨃-recursion : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} {A : Set ℓ₃}
             → (X → A) → (Y → A) → (X ⨃ Y → A)
-+-recursion {A = A} = +-induction (λ _ → A)
+⨃-recursion {A = A} = ⨃-induction (λ _ → A)
+
+𝟚 : Set₀
+𝟚 = 𝟙 ⨃ 𝟙
+
+pattern ₀ = inl ⋆
+pattern ₁ = inr ⋆
+
+𝟚-induction : ∀ {ℓ} (A : 𝟚 → Set ℓ) → A ₀ → A ₁ → ((n : 𝟚) → A n)
+𝟚-induction A a₀ a₁ (inl ⋆) = a₀
+𝟚-induction A a₀ a₁ (inr ⋆) = a₁
+
+𝟚-induction' : ∀ {ℓ} (A : 𝟚 → Set ℓ) → A ₀ → A ₁ → ((n : 𝟚) → A n)
+𝟚-induction' A a₀ a₁ =
+    ⨃-induction A
+    (𝟙-induction (λ x → A (inl x)) a₀)
+    (𝟙-induction (λ x → A (inr x)) a₁)
+
+record Σ {ℓ₁ ℓ₂} (X : Set ℓ₁) (Y : X → Set ℓ₂) : Set (ℓ₁ ⊔ ℓ₂) where
+    constructor _,_
+    field
+        fst : X
+        snd : Y fst
+open Σ public
+
+Σ-induction : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : X → Set ℓ₂} {A : Σ X Y → Set ℓ₃}
+            → ((x : X) (y : Y x) → A (x , y))
+            → ((s : Σ X Y) → A s)
+Σ-induction f (x , y) = f x y
+
+curry : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : X → Set ℓ₂} {A : Σ X Y → Set ℓ₃}
+      → ((s : Σ X Y) → A s)
+      → ((x : X) (y : Y x) → A (x , y))
+curry f x y = f (x , y)
+
+_×_ : ∀ {ℓ₁ ℓ₂} → Set ℓ₁ → Set ℓ₂ → Set (ℓ₁ ⊔ ℓ₂)
+X × Y = Σ X (λ _ → Y)
+
+
