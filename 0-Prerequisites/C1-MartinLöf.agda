@@ -132,4 +132,139 @@ curry f x y = f (x , y)
 _×_ : ∀ {ℓ₁ ℓ₂} → Set ℓ₁ → Set ℓ₂ → Set (ℓ₁ ⊔ ℓ₂)
 X × Y = Σ X (λ _ → Y)
 
+id : ∀ {ℓ} {X : Set ℓ} → X → X
+id x = x
+
+_∘_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {X : Set ℓ₁} {Y : Set ℓ₂} {Z : Y → Set ℓ₃}
+    → ((y : Y) → Z y)
+    → (f : X → Y)
+    → ((x : X) → Z (f x))
+(f ∘ g) x = f (g x)
+
+data Id {ℓ} (X : Set ℓ) : X → X → Set ℓ where
+    refl : (x : X) → Id X x x
+
+_≡_ : ∀ {ℓ} {X : Set ℓ} → X → X → Set ℓ
+x ≡ y = Id _ x y
+
+infix 4 _≡_
+
+J : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : (x y : X) → x ≡ y → Set ℓ₂)
+  → ((x : X) → A x x (refl x))
+  → ((x y : X) (p : x ≡ y) → A x y p)
+J A f x x (refl x) = f x
+
+H : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (x : X) (B : (y : X) → x ≡ y → Set ℓ₂)
+  → B x (refl x)
+  → (y : X) (p : x ≡ y) → B y p
+H x B b y (refl x) = b
+
+J' : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : (x y : X) → x ≡ y → Set ℓ₂)
+  → ((x : X) → A x x (refl x))
+  → ((x y : X) (p : x ≡ y) → A x y p)
+J' A f x = H x (A x) (f x)
+
+Js-agreement : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : (x y : X) → x ≡ y → Set ℓ₂)
+             → (f : (x : X) → A x x (refl x))
+             → (x y : X) → (p : x ≡ y)
+             → J A f x y p ≡ J' A f x y p
+Js-agreement A f x y (refl x) = refl (f x)
+
+transport : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : X → Set ℓ₂) {x y : X}
+          → x ≡ y
+          → (A x → A y)
+transport A (refl x) a = a
+
+transport-J : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : X → Set ℓ₂) {x y : X}
+            → x ≡ y
+            → (A x → A y)
+transport-J A {x} {y} = J (λ x y p → A x → A y) (λ _ → id) x y
+
+nondep-H : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (x : X) (A : X → Set ℓ₂)
+         → A x
+         → ((y : X) → x ≡ y → A y)
+nondep-H x A = H x (λ y p → A y)
+
+transport-H : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : X → Set ℓ₂) {x y : X}
+            → x ≡ y
+            → (A x → A y)
+transport-H A {x} {y} p a = nondep-H x A a y p
+
+transports-agreement : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} (A : X → Set ℓ₂) {x y : X} (p : x ≡ y)
+                     → (transport-H A p ≡ transport A p)
+                     × (transport-J A p ≡ transport A p)
+transports-agreement A (refl x) = refl (transport A (refl x))
+                                , refl (transport A (refl x))
+
+lhs : ∀ {ℓ} {X : Set ℓ} {x y : X} → x ≡ y → X
+lhs {x = x} p = x
+
+rhs : ∀ {ℓ} {X : Set ℓ} {x y : X} → x ≡ y → X
+rhs {y = y} p = y
+
+_∙_ : ∀ {ℓ} {X : Set ℓ} {x y z : X} → x ≡ y → y ≡ z → x ≡ z
+_∙_ {x = x} p q = transport (x ≡_) q p
+
+_≡⟨_⟩_ : ∀ {ℓ} {X : Set ℓ} (x : X) {y z : X} → x ≡ y → y ≡ z → x ≡ z
+_ ≡⟨ x≡y ⟩ y≡z = x≡y ∙ y≡z
+
+_∎ : ∀ {ℓ} {X : Set ℓ} (x : X) → x ≡ x
+x ∎ = refl x
+
+_⁻¹ : ∀ {ℓ} {X : Set ℓ} {x y : X} → x ≡ y → y ≡ x
+_⁻¹ {x = x} p = transport (_≡ x) p (refl x)
+
+_∙'_ : ∀ {ℓ} {X : Set ℓ} {x y z : X} → x ≡ y → y ≡ z → x ≡ z
+_∙'_ {z = z} p q = transport (_≡ z) (p ⁻¹) q
+
+∙-agreement : ∀ {ℓ} {X : Set ℓ} {x y z : X} → (p : x ≡ y) → (q : y ≡ z)
+            → p ∙ q ≡ p ∙' q
+∙-agreement (refl x) (refl x) = refl (refl x)
+
+rdnel : ∀ {ℓ} {X : Set ℓ} {x y : X} (p : x ≡ y) → p ∙ refl y ≡ p
+rdnel p = refl p
+
+rdner : ∀ {ℓ} {X : Set ℓ} {y z : X} (q : y ≡ z) → refl y ∙' q ≡ q
+rdner q = refl q
+
+ap : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} {Y : Set ℓ₂} (f : X → Y) {x₁ x₂ : X}
+   → x₁ ≡ x₂ → f x₁ ≡ f x₂
+ap f (refl x) = refl (f x)
+
+_~_ : ∀ {ℓ₁ ℓ₂} {X : Set ℓ₁} {A : X → Set ℓ₂}
+    → ((x : X) → A x) → ((x : X) → A x)
+    → Set (ℓ₁ ⊔ ℓ₂)
+f ~ g  = ∀ x → f x ≡ g x
+
+¬¬ ¬¬¬ : ∀ {ℓ} → Set ℓ → Set ℓ
+¬¬ A = ¬ (¬ A)
+¬¬¬ A = ¬ (¬¬ A)
+
+dni : ∀ {ℓ} (A : Set ℓ) → A → ¬¬ A
+dni A a u = u a
+
+contrapositive : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → (A → B) → (¬ B → ¬ A)
+contrapositive f ¬b a = ¬b (f a)
+
+tno : ∀ {ℓ} (A : Set ℓ) → ¬¬¬ A → ¬ A
+tno A = contrapositive (dni A)
+
+_⇔_ : ∀ {ℓ₁ ℓ₂} → (A : Set ℓ₁) → (B : Set ℓ₂) → Set (ℓ₁ ⊔ ℓ₂)
+A ⇔ B = (A → B) × (B → A)
+
+lr-implication : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} → {B : Set ℓ₂} → A ⇔ B → (A → B)
+lr-implication = fst
+
+rl-implication : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} → {B : Set ℓ₂} → A ⇔ B → (B → A)
+rl-implication = snd
+
+absurdity³-is-absurdity : ∀ {ℓ} {A : Set ℓ} → ¬¬¬ A ⇔ ¬ A
+absurdity³-is-absurdity {A = A} = tno A , dni (¬ A)
+
+_≢_ : ∀ {ℓ} {X : Set ℓ} → X → X → Set ℓ
+x ≢ y = ¬ (x ≡ y)
+
+≢-sym : ∀ {ℓ} {X : Set ℓ} {x y : X} → x ≢ y → y ≢ x
+≢-sym x≢y x≡y = x≢y (x≡y ⁻¹)
+
 
