@@ -267,4 +267,36 @@ x ≢ y = ¬ (x ≡ y)
 ≢-sym : ∀ {ℓ} {X : Set ℓ} {x y : X} → x ≢ y → y ≢ x
 ≢-sym x≢y x≡y = x≢y (x≡y ⁻¹)
 
+Id→Fun : ∀ {ℓ} {X Y : Set ℓ} → X ≡ Y → (X → Y)
+Id→Fun = transport id
 
+Id→Fun' : ∀ {ℓ} {X Y : Set ℓ} → X ≡ Y → (X → Y)
+Id→Fun' (refl X) = id
+
+Id→Funs-agree : ∀ {ℓ} {X Y : Set ℓ} → (p : X ≡ Y) → Id→Fun p ≡ Id→Fun' p
+Id→Funs-agree (refl X) = refl id
+
+𝟙-is-not-𝟘 : 𝟙 ≢ 𝟘
+𝟙-is-not-𝟘 𝟙≡𝟘 = Id→Fun 𝟙≡𝟘 ⋆
+
+₁-is-not-₀ : ₁ ≢ ₀
+₁-is-not-₀ ₁≢₀ = 𝟙-is-not-𝟘 (ap f ₁≢₀)
+    where
+        f : 𝟚 → Set₀
+        f ₀ = 𝟘
+        f ₁ = 𝟙
+
+decidable : ∀ {ℓ} → Set ℓ → Set ℓ
+decidable A = A ⨃ ¬ A
+
+has-decidable-equality : ∀ {ℓ} → Set ℓ → Set ℓ
+has-decidable-equality X = (x y : X) → decidable (x ≡ y)
+
+𝟚-has-decidable-equality : has-decidable-equality 𝟚
+𝟚-has-decidable-equality ₀ ₀ = inl (refl ₀)
+𝟚-has-decidable-equality ₀ ₁ = inr (≢-sym ₁-is-not-₀)
+𝟚-has-decidable-equality ₁ ₀ = inr ₁-is-not-₀
+𝟚-has-decidable-equality ₁ ₁ = inl (refl ₁)
+
+
+ 
