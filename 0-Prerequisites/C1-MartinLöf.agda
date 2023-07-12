@@ -298,5 +298,9 @@ has-decidable-equality X = (x y : X) → decidable (x ≡ y)
 𝟚-has-decidable-equality ₁ ₀ = inr ₁-is-not-₀
 𝟚-has-decidable-equality ₁ ₁ = inl (refl ₁)
 
+not-zero-is-one : (n : 𝟚) → n ≢ ₀ → n ≡ ₁
+not-zero-is-one ₀ n≢₀ = !𝟘 (n≢₀ (refl ₀))
+not-zero-is-one ₁ n≢₀ = refl ₁
+
 
  
